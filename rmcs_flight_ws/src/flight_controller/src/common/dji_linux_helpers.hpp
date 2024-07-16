@@ -31,7 +31,7 @@
 #ifndef ONBOARDSDK_HELPERS_H
 #define ONBOARDSDK_HELPERS_H
 
-#include <dji_linux_environment.hpp>
+#include "dji_linux_environment.hpp"
 #include <djiosdk/dji_vehicle.hpp>
 #include <fstream>
 

@@ -30,7 +30,7 @@
  *
  */
 
-#include "flight_control_sample.hpp"
+#include "dji_flight_control.hpp"
 
 using namespace DJI::OSDK;
 using namespace DJI::OSDK::Telemetry;
