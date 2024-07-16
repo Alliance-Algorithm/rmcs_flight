@@ -1,0 +1,4 @@
+{
+    "cmake.configureOnOpen": false,
+    "cmake.sourceDirectory": "/workspaces/rmcs_flight/test/linux"
+}
