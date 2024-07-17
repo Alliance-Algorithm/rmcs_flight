@@ -4,29 +4,31 @@
 
 void RmcsFlightController::initialization()
 {
-    /* --- load parameters --- */
+    // load parameters
     load_parameters();
 
-    /* --- initialize dji osdk --- */
+    // initialize dji osdk
     initialize_djiosdk();
 
-    /* --- subscribe to pose topic --- */
+    // subscribe to /rmcs_slam/position
     pose_subscription_ = this->create_subscription<nav_msgs::msg::Odometry>(
-        "/rmcs_slam/position", 10,
+        mid360_data_topic_, 10,
         [this](const nav_msgs::msg::Odometry::UniquePtr& msg) { pose_subscription_callback(msg); });
-    RCLCPP_INFO(get_logger(), "Subscribed to /rmcs_slam/position");
 
-    /* --- takeoff if not --- */
+    RCLCPP_INFO(get_logger(), "Subscribed to %s", mid360_data_topic_.c_str());
+
+    // wait for takeoff if not
     if (debug)
         monitoredTakeoff(vehicle_);
 
-    /* --- initialize telemetry --- */
+    // initialize telemetry
     initialize_telemetry();
 
-    /* --- main process timer --- */
-    using namespace std::chrono_literals;
-    main_process_timer_ = this->create_wall_timer(20ms,
+    // start main process timer
+    main_process_timer_ = this->create_wall_timer(
+        std::chrono::milliseconds(static_cast<int>(1000 / control_frequency_hz_)),
         [this]() { main_process_timer_callback(); });
+
     RCLCPP_INFO(get_logger(), "Main process timer started.");
 };
 
@@ -46,7 +48,7 @@ void RmcsFlightController::initialize_djiosdk()
     ACK::ErrorCode result = vehicle_->obtainCtrlAuthority(functionTimeout);
     RCLCPP_INFO(get_logger(), "Obtain control authority result: %d", result.data);
 
-    /*! Turn off rtk switch */
+    // Turn off rtk switch
     ErrorCode::ErrorCodeType ret;
     ret = vehicle_->flightController->setRtkEnableSync(
         FlightController::RtkEnabled::RTK_DISABLE, 1);
@@ -122,6 +124,9 @@ void RmcsFlightController::load_parameters()
     kp_ = get_parameter_or<double>("pid.kp", 0.5);
     ki_ = get_parameter_or<double>("pid.ki", 0.0);
     kd_ = get_parameter_or<double>("pid.kd", 0.1);
+
+    control_frequency_hz_ = get_parameter_or<int>("control_frequency", 50);
+    mid360_data_topic_ = get_parameter_or<std::string>("mid360_data_topic", "/rmcs_slam/position");
 
     auto dji_config_path = get_parameter_or<std::string>("dji.config_path", "");
 

@@ -36,6 +36,7 @@ private:
     LinuxSetup* linuxEnvironment_;
 
     // mid360 datas
+    std::string mid360_data_topic_;
     Eigen::Vector3d mid360_position_ = Eigen::Vector3d::Zero();
     Eigen::Vector3d mid360_euler_angles_ = Eigen::Vector3d::Zero();
 
@@ -52,6 +53,7 @@ private:
     int last_rc_mode_ = -1;
 
     // parameters
+    int control_frequency_hz_;
 
 private:
     /* --- main process functions --- */
