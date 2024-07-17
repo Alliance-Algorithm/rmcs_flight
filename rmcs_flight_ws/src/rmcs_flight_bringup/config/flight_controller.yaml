@@ -1,0 +1,8 @@
+rmcs_flight_controller:
+  ros__parameters:
+    pid:
+      kp: 5.0
+      ki: 0.0
+      kd: 0.1
+    dji:
+      config_path: "/workspaces/rmcs_flight/rmcs_flight_ws/src/rmcs_flight_bringup/config/Dji_config.txt"

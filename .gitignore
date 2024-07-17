@@ -56,3 +56,5 @@ CATKIN_IGNORE
 
 # DJI Onboard SDK
 Onboard-SDK/
+
+rmcs_slam/

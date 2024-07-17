@@ -10,6 +10,7 @@ set(PACKAGES
     nav_msgs
     Eigen3
     DJIOSDK
+    tf2_ros
 )
 
 # FIND PACKAGES
@@ -22,11 +23,14 @@ endforeach()
 
 aux_source_directory(src/common SOURCE)
 
-# BUILD OFFLINE EXE
+file(GLOB FUNCTIONS_SOURCE src/functions/*.cpp)
+
+# BUILD EXE
 add_executable(
   ${PROJECT_NAME}_exe
   ${SOURCE} 
   src/main.cpp
+  ${FUNCTIONS_SOURCE}
 )
 
 ament_target_dependencies(
@@ -41,7 +45,7 @@ install(
 )
 
 include_directories(${PACKAGES}_INCLUDE_DIR)
-include_directories(${PROJECT_SOURCE_DIR}/include)
+include_directories(${PROJECT_SOURCE_DIR}/src/functions)
 include_directories(${PROJECT_SOURCE_DIR}/src)
 
 ament_package()
