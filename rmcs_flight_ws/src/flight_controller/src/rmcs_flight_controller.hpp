@@ -13,7 +13,6 @@
 #include <tf2_ros/transform_broadcaster.h>
 
 // dji_osdk
-#include "common/dji_flight_control.hpp"
 #include "common/dji_linux_helpers.hpp"
 #include "dji_vehicle.hpp"
 #include <djiosdk/dji_control.hpp>

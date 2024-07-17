@@ -1,3 +1,5 @@
+#include "common/dji_flight_control.hpp"
+
 #include "rmcs_flight_controller.hpp"
 
 void RmcsFlightController::initialization()

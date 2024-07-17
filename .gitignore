@@ -58,3 +58,4 @@ CATKIN_IGNORE
 Onboard-SDK/
 
 rmcs_slam/
+others/
