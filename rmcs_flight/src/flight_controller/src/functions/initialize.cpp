@@ -18,7 +18,7 @@ void RmcsFlightController::initialization()
     RCLCPP_INFO(get_logger(), "Subscribed to %s", mid360_data_topic_.c_str());
 
     // wait for takeoff if not
-    if (debug)
+    if (debug_)
         monitoredTakeoff(vehicle_);
 
     // initialize telemetry
@@ -29,7 +29,7 @@ void RmcsFlightController::initialization()
         std::chrono::milliseconds(static_cast<int>(1000 / control_frequency_hz_)),
         [this]() { main_process_timer_callback(); });
 
-    RCLCPP_INFO(get_logger(), "Main process timer started.");
+    RCLCPP_INFO(get_logger(), "\n[√] Main process timer started.");
 };
 
 void RmcsFlightController::initialize_djiosdk()
@@ -40,7 +40,7 @@ void RmcsFlightController::initialize_djiosdk()
     // Setup OSDK.
     vehicle_ = linuxEnvironment_->getVehicle();
     if (vehicle_ == NULL) {
-        RCLCPP_ERROR(get_logger(), "Vehicle not initialized, exiting.");
+        RCLCPP_ERROR(get_logger(), "\n[x] Vehicle not initialized, exiting.");
         rclcpp::shutdown();
     }
 
@@ -57,7 +57,7 @@ void RmcsFlightController::initialize_djiosdk()
     else
         RCLCPP_INFO(get_logger(), "Turn off rtk switch successfully");
 
-    RCLCPP_INFO(get_logger(), "Dji-osdk initializtion complete.");
+    RCLCPP_INFO(get_logger(), "\n[√] Dji-osdk initializtion complete.");
 };
 
 bool RmcsFlightController::initialize_telemetry()
@@ -115,12 +115,14 @@ bool RmcsFlightController::initialize_telemetry()
 
     // Wait for the data to start coming in.
     usleep(500 * 1000);
-    RCLCPP_INFO(get_logger(), "Telemetry initialization complete.");
+    RCLCPP_INFO(get_logger(), "\n[√] Telemetry initialization complete.");
     return true;
 }
 
 void RmcsFlightController::load_parameters()
 {
+    debug_ = get_parameter_or<bool>("debug", false);
+
     kp_ = get_parameter_or<double>("pid.kp", 0.5);
     ki_ = get_parameter_or<double>("pid.ki", 0.0);
     kd_ = get_parameter_or<double>("pid.kd", 0.1);
@@ -144,6 +146,6 @@ void RmcsFlightController::release_telemtetry()
 {
     vehicle_->subscribe->removePackage(0, responseTimeout_);
     vehicle_->subscribe->removePackage(1, responseTimeout_);
-    std::cout << "\n--- Release telemetry complete.\n"
+    std::cout << "\n---[√] Release telemetry complete.\n"
               << std::endl;
 }

@@ -21,8 +21,6 @@
 // eigen
 #include <eigen3/Eigen/Eigen>
 
-constexpr auto debug = true;
-
 class RmcsFlightController : public rclcpp::Node {
 public:
     explicit RmcsFlightController(int argc, char** argv);
@@ -54,6 +52,7 @@ private:
 
     // parameters
     int control_frequency_hz_;
+    int debug_;
 
 private:
     /* --- main process functions --- */

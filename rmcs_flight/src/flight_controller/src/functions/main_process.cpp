@@ -5,26 +5,35 @@ void RmcsFlightController::main_process_timer_callback()
     receive_subscription_data();
 
     if (rc_mode_ == 0 && last_rc_mode_ == 0) {
-        RCLCPP_INFO(get_logger(), "Mauanl mode, waiting for rc mode change.");
+        if (debug_)
+            RCLCPP_INFO(get_logger(), "Mauanl mode, waiting for rc mode change.");
         return;
     }
     if (rc_mode_ == 1 && last_rc_mode_ == 0) {
         RCLCPP_INFO(get_logger(), "\n\n>>> Self-stabilization mode, start control.\n");
 
+        // reset PID and target position
         target_position_ = mid360_position_;
         integral_error_ = Eigen::Vector3d::Zero();
         last_error_ = Eigen::Vector3d::Zero();
 
-        int require_count = 0;
         // Obtain Control Authority
-
         ACK::ErrorCode result = vehicle_->obtainCtrlAuthority(1);
-        require_count++;
+
         RCLCPP_INFO(get_logger(), "Obtain control authority result: %d", result.data);
+        if (result.data == 2)
+            RCLCPP_INFO(get_logger(), "\n--- current control authority is OSDK.");
+        else
+            RCLCPP_ERROR(get_logger(), "\n--- Obtain control authority failed!");
     }
     if (rc_mode_ == 0 && last_rc_mode_ == 1) {
         RCLCPP_INFO(get_logger(), "\n\n>>> Manual mode, release control authority.\n");
-        vehicle_->releaseCtrlAuthority(1);
+        ACK::ErrorCode result = vehicle_->releaseCtrlAuthority(1);
+        RCLCPP_INFO(get_logger(), "Release control authority result: %d", result.data);
+        if (result.data == 0)
+            RCLCPP_INFO(get_logger(), "\n--- current control authority is RC.");
+        else
+            RCLCPP_ERROR(get_logger(), "\n--- Release control authority failed!");
         return;
     }
 
@@ -52,9 +61,10 @@ void RmcsFlightController::main_process_timer_callback()
     control_input.y() = std::clamp(control_input.y(), -2., 2.);
     control_input.z() = std::clamp(control_input.z(), -2., 2.);
 
-    std::cout << "control_input: " << control_input.x() << ", "
-              << control_input.y() << ", " << control_input.z() << ","
-              << imu_euler_angles_.z() / std::numbers::pi * 180 << std::endl;
+    if (debug_)
+        std::cout << "control_input: " << control_input.x() << ", "
+                  << control_input.y() << ", " << control_input.z() << ","
+                  << imu_euler_angles_.z() / std::numbers::pi * 180 << std::endl;
 
     vehicle_->control->velocityAndYawRateCtrl(
         control_input.x(),
