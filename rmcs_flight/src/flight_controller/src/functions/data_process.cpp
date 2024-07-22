@@ -30,6 +30,10 @@ void RmcsFlightController::receive_subscription_data()
     DJI::OSDK::Telemetry::TypeMap<DJI::OSDK::Telemetry::TOPIC_RC>::type rc_data;
     rc_data = vehicle_->subscribe->getValue<DJI::OSDK::Telemetry::TOPIC_RC>();
 
+    DJI::OSDK::Telemetry::TypeMap<DJI::OSDK::Telemetry::TOPIC_ALTITUDE_BAROMETER>::type altitude;
+    altitude = vehicle_->subscribe->getValue<DJI::OSDK::Telemetry::TOPIC_ALTITUDE_BAROMETER>();
+    altitude_ = static_cast<float>(altitude);
+
     if (rc_data.mode > 0) {
         rc_mode_ = 2;
     } else if (rc_data.mode == 0) {
@@ -38,8 +42,6 @@ void RmcsFlightController::receive_subscription_data()
         rc_mode_ = 0;
     }
 
-    // std::cout << "rc_data: " << rc_mode_ << std::endl;
-
     imu_euler_angles_ = toEulerAngle(
         Eigen::Quaterniond(
             imu_raw_quaternion.q0,
@@ -47,11 +49,12 @@ void RmcsFlightController::receive_subscription_data()
             imu_raw_quaternion.q2,
             imu_raw_quaternion.q3));
 
-    // std::cout << "Attitude Euler_angles (x,y,z) = (" << imu_euler_angles.x() / std::numbers::pi * 180
-    //           << ", " << imu_euler_angles.y() / std::numbers::pi * 180 << ", " << imu_euler_angles.z() / std::numbers::pi * 180 << ")\n";
+
+    // std::cout << "Attitude Euler_angles (x,y,z) = (" << imu_euler_angles_.x() / std::numbers::pi * 180
+    //           << ", " << imu_euler_angles_.y() / std::numbers::pi * 180 << ", " << imu_euler_angles_.z() / std::numbers::pi * 180 << ")\n";
 
     // std::cout << "mid360 Euler_angles (x,y,z) = (" << mid360_euler_angles_.x()
     //           << ", " << mid360_euler_angles_.y() << ", " << mid360_euler_angles_.z() << ")\n";
-    // std::cout << "mid360 positions (x,y,z) = (" << mid360_position_.x()
-    //           << ", " << mid360_position_.y() << ", " << mid360_position_.z() << ")\n";
+    //  std::cout << "mid360 positions (x,y,z) = (" << mid360_position_.x()
+    //    << ", " << mid360_position_.y() << ", " << mid360_position_.z() << ")\n";
 }
