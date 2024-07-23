@@ -2,10 +2,10 @@ rmcs_flight_controller:
   ros__parameters:
     debug: false
     pid:
-      kp: 5.0
+      kp: 20.0
       ki: 0.0
-      kd: 0.1
-    control_frequency: 50
+      kd: 0.5
+    control_frequency: 10
     mid360_data_topic: "/rmcs_slam/position"
     dji:
-      config_path: "/workspaces/workspace/rmcs_flight/src/rmcs_flight_bringup/config/Dji_config.txt"
+      config_path: "/workspaces/workspace/rmcs_flight/rmcs_flight/src/bringup/config/Dji_config.txt"

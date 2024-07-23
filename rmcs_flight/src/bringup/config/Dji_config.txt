@@ -1,4 +1,4 @@
 app_id : 1149003
 app_key : 46fb3b928052b2695c316b2b3f909d47d59d820c8ac7b66d6559fe5350e6cb0f
 device : /dev/rmcs_flight_ch340
-baudrate : 230400
+baudrate : 921600

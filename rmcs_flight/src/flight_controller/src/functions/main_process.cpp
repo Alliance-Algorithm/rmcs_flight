@@ -4,12 +4,12 @@ void RmcsFlightController::main_process_timer_callback()
 {
     receive_subscription_data();
 
-    if (rc_mode_ == 0 && last_rc_mode_ == 0) {
+    if ((rc_mode_ == 0 && last_rc_mode_ == 0) || (rc_mode_ == 2 && last_rc_mode_ == 2)) {
         if (debug_)
             RCLCPP_INFO(get_logger(), "Mauanl mode, waiting for rc mode change.");
         return;
     }
-    if (rc_mode_ == 1 && last_rc_mode_ == 0) {
+    if ((rc_mode_ == 1 && last_rc_mode_ == 0) || (rc_mode_ == 1 && last_rc_mode_ == 2)) {
         RCLCPP_INFO(get_logger(), "\n\n>>> Self-stabilization mode, start control.\n");
 
         // reset PID and target position
@@ -26,7 +26,7 @@ void RmcsFlightController::main_process_timer_callback()
         else
             RCLCPP_ERROR(get_logger(), "\n--- Obtain control authority failed!");
     }
-    if (rc_mode_ == 0 && last_rc_mode_ == 1) {
+    if ((rc_mode_ == 0 && last_rc_mode_ == 1) || (rc_mode_ == 2 && last_rc_mode_ == 1)) {
         RCLCPP_INFO(get_logger(), "\n\n>>> Manual mode, release control authority.\n");
         ACK::ErrorCode result = vehicle_->releaseCtrlAuthority(1);
         RCLCPP_INFO(get_logger(), "Release control authority result: %d", result.data);
@@ -36,6 +36,7 @@ void RmcsFlightController::main_process_timer_callback()
             RCLCPP_ERROR(get_logger(), "\n--- Release control authority failed!");
         return;
     }
+
 
     // 当前误差
     Eigen::Vector3d error
@@ -55,20 +56,31 @@ void RmcsFlightController::main_process_timer_callback()
     Eigen::Vector3d control_input;
     control_input.x() = kp_ * error.x() + ki_ * integral_error_.x() + kd_ * derivative_error.x();
     control_input.y() = kp_ * error.y() + ki_ * integral_error_.y() + kd_ * derivative_error.y();
-    control_input.z() = kp_ * error.z() + ki_ * integral_error_.z() + kd_ * derivative_error.z();
+    control_input.z() = kp_ * 0.1 * error.z() + ki_ * integral_error_.z() + kd_ * derivative_error.z();
 
-    control_input.x() = std::clamp(control_input.x(), -2., 2.);
-    control_input.y() = std::clamp(control_input.y(), -2., 2.);
-    control_input.z() = std::clamp(control_input.z(), -2., 2.);
+    control_input.x() = std::clamp(control_input.x(), -10., 10.);
+    control_input.y() = std::clamp(control_input.y(), -10., 10.);
+    control_input.z() = std::clamp(control_input.z(), -0.5, 0.5);
 
-    if (debug_)
-        std::cout << "control_input: " << control_input.x() << ", "
-                  << control_input.y() << ", " << control_input.z() << ","
-                  << imu_euler_angles_.z() / std::numbers::pi * 180 << std::endl;
+    // if (debug_)
 
-    vehicle_->control->velocityAndYawRateCtrl(
-        control_input.x(),
-        control_input.y(),
-        control_input.z(),
-        0);
+    // RCLCPP_INFO(get_logger(), "error: %f,%f,%f",
+    //     error.x(),
+    //     error.y(),
+    //     error.z());
+
+        RCLCPP_INFO(get_logger(), "control_input: roll:%f,pitch:%f,yaw:%f",
+        -control_input.x(),
+        -control_input.y(),
+        control_input.z());
+
+    angularAndYawRateCtrl(
+         -control_input.x(),
+         -control_input.y(),
+        0,
+        // control_input.z()
+        0
+        );
+
+    // angularAndYawRateCtrl(5, 0, 0, 0);
 }

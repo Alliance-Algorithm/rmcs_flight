@@ -22,3 +22,12 @@ Eigen::Vector3d RmcsFlightController::toEulerAngle(const Eigen::Quaterniond& q)
 
     return Eigen::Vector3d(roll, pitch, yaw);
 }
+
+void RmcsFlightController::angularAndYawRateCtrl(float roll,float pitch,float yaw_rate,float z_velo)
+{
+    uint8_t ctrl_flag = (DJI::OSDK::Control::VERTICAL_VELOCITY | DJI::OSDK::Control::HORIZONTAL_ANGLE | DJI::OSDK::Control::YAW_RATE |
+                    DJI::OSDK::Control::HORIZONTAL_BODY);
+    //! @note 10 is the flag value of this mode
+    DJI::OSDK::Control::CtrlData data(ctrl_flag, roll, pitch, z_velo, yaw_rate);
+    vehicle_->control->flightCtrl(data);
+}

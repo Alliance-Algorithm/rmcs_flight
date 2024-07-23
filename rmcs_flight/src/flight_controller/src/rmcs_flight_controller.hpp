@@ -49,6 +49,7 @@ private:
     Eigen::Vector3d imu_euler_angles_;
     int rc_mode_ = -1;
     int last_rc_mode_ = -1;
+    float altitude_;
 
     // parameters
     int control_frequency_hz_;
@@ -76,4 +77,6 @@ private:
     void load_parameters();
 
     void release_telemtetry();
+
+    void angularAndYawRateCtrl(float roll,float pitch,float yaw_rate,float z_velo);
 };

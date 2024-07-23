@@ -1,5 +1,3 @@
-#include "common/dji_flight_control.hpp"
-
 #include "rmcs_flight_controller.hpp"
 
 void RmcsFlightController::initialization()
@@ -18,8 +16,8 @@ void RmcsFlightController::initialization()
     RCLCPP_INFO(get_logger(), "Subscribed to %s", mid360_data_topic_.c_str());
 
     // wait for takeoff if not
-    if (debug_)
-        monitoredTakeoff(vehicle_);
+    // if (debug_)
+    //     monitoredTakeoff(vehicle_);
 
     // initialize telemetry
     initialize_telemetry();
@@ -64,6 +62,7 @@ bool RmcsFlightController::initialize_telemetry()
 {
     vehicle_->subscribe->removePackage(0, responseTimeout_);
     vehicle_->subscribe->removePackage(1, responseTimeout_);
+    vehicle_->subscribe->removePackage(2, responseTimeout_);
     // Verify the subscription
     ACK::ErrorCode subscribeStatus;
     subscribeStatus = vehicle_->subscribe->verify(responseTimeout_);
@@ -113,8 +112,28 @@ bool RmcsFlightController::initialize_telemetry()
         return false;
     }
 
+    // Subscribe to RC Channel at freq 50 Hz
+    pkgIndex = 2;
+    freq = 50;
+    DJI::OSDK::Telemetry::TopicName topicList50Hz_2[] = { DJI::OSDK::Telemetry::TOPIC_ALTITUDE_BAROMETER };
+    numTopic = sizeof(topicList50Hz_2) / sizeof(topicList50Hz_2[0]);
+    enableTimestamp = false;
+
+    pkgStatus = vehicle_->subscribe->initPackageFromTopicList(
+        pkgIndex, numTopic, topicList50Hz_2, enableTimestamp, freq);
+    if (!(pkgStatus)) {
+        return pkgStatus;
+    }
+    subscribeStatus = vehicle_->subscribe->startPackage(pkgIndex, responseTimeout_);
+    if (ACK::getError(subscribeStatus) != ACK::SUCCESS) {
+        ACK::getErrorCodeMessage(subscribeStatus, __func__);
+        // Cleanup before return
+        vehicle_->subscribe->removePackage(pkgIndex, responseTimeout_);
+        return false;
+    }
+
     // Wait for the data to start coming in.
-    usleep(500 * 1000);
+    usleep(1000 * 1000);
     RCLCPP_INFO(get_logger(), "\n[√] Telemetry initialization complete.");
     return true;
 }
