@@ -21,6 +21,10 @@
 // eigen
 #include <eigen3/Eigen/Eigen>
 
+// pid
+#include "double_loop_pid/pid_controller.hpp"
+
+namespace rmcs_flight {
 class RmcsFlightController : public rclcpp::Node {
 public:
     explicit RmcsFlightController(int argc, char** argv);
@@ -39,44 +43,44 @@ private:
     Eigen::Vector3d mid360_euler_angles_ = Eigen::Vector3d::Zero();
 
     // PID parameters
-    Eigen::Vector3d integral_error_ = Eigen::Vector3d::Zero();
-    Eigen::Vector3d last_error_ = Eigen::Vector3d::Zero();
-    Eigen::Vector3d target_position_ = Eigen::Vector3d(0.0, 0.0, 0.5);
-    double kp_, ki_, kd_;
+    double kp_pos_, ki_pos_, kd_pos_;
+    double kp_velo_, ki_velo_, kd_velo_;
+    DoubleLoopPIDController pid_controller_;
 
     // telemetry
-    int responseTimeout_ = 1;
+    int responseTimeout_
+        = 1;
     Eigen::Vector3d imu_euler_angles_;
     int rc_mode_ = -1;
     int last_rc_mode_ = -1;
     float altitude_;
 
-    // parameters
+    // other parameters
     int control_frequency_hz_;
     int debug_;
 
 private:
     /* --- main process functions --- */
+
     void main_process_timer_callback();
 
     /* --- data callback functions --- */
-    void pose_subscription_callback(const nav_msgs::msg::Odometry::UniquePtr& msg);
 
+    void pose_subscription_callback(const nav_msgs::msg::Odometry::UniquePtr& msg);
     void receive_subscription_data();
 
     /* --- utility functions --- */
-    Eigen::Vector3d toEulerAngle(const Eigen::Quaterniond& q);
+
+    Eigen::Vector3d to_euler_angle(const Eigen::Quaterniond& q);
+    void angular_and_yaw_rate_ctrl(float roll, float pitch, float yaw_rate, float z_velo);
+    bool if_self_stable();
 
     /* --- initialization functions --- */
+
     void initialization();
-
     void initialize_djiosdk();
-
     bool initialize_telemetry();
-
     void load_parameters();
-
     void release_telemtetry();
-
-    void angularAndYawRateCtrl(float roll,float pitch,float yaw_rate,float z_velo);
 };
+}

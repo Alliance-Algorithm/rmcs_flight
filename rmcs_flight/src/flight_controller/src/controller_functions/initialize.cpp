@@ -1,9 +1,14 @@
 #include "rmcs_flight_controller.hpp"
 
+namespace rmcs_flight {
 void RmcsFlightController::initialization()
 {
     // load parameters
     load_parameters();
+
+    // initialize pid controller
+    pid_controller_ = DoubleLoopPIDController(kp_pos_, ki_pos_, kd_pos_, kp_velo_, ki_velo_, kd_velo_);
+    pid_controller_.reset_pid(Eigen::Vector3d::Zero());
 
     // initialize dji osdk
     initialize_djiosdk();
@@ -14,10 +19,6 @@ void RmcsFlightController::initialization()
         [this](const nav_msgs::msg::Odometry::UniquePtr& msg) { pose_subscription_callback(msg); });
 
     RCLCPP_INFO(get_logger(), "Subscribed to %s", mid360_data_topic_.c_str());
-
-    // wait for takeoff if not
-    // if (debug_)
-    //     monitoredTakeoff(vehicle_);
 
     // initialize telemetry
     initialize_telemetry();
@@ -112,26 +113,6 @@ bool RmcsFlightController::initialize_telemetry()
         return false;
     }
 
-    // Subscribe to RC Channel at freq 50 Hz
-    pkgIndex = 2;
-    freq = 50;
-    DJI::OSDK::Telemetry::TopicName topicList50Hz_2[] = { DJI::OSDK::Telemetry::TOPIC_ALTITUDE_BAROMETER };
-    numTopic = sizeof(topicList50Hz_2) / sizeof(topicList50Hz_2[0]);
-    enableTimestamp = false;
-
-    pkgStatus = vehicle_->subscribe->initPackageFromTopicList(
-        pkgIndex, numTopic, topicList50Hz_2, enableTimestamp, freq);
-    if (!(pkgStatus)) {
-        return pkgStatus;
-    }
-    subscribeStatus = vehicle_->subscribe->startPackage(pkgIndex, responseTimeout_);
-    if (ACK::getError(subscribeStatus) != ACK::SUCCESS) {
-        ACK::getErrorCodeMessage(subscribeStatus, __func__);
-        // Cleanup before return
-        vehicle_->subscribe->removePackage(pkgIndex, responseTimeout_);
-        return false;
-    }
-
     // Wait for the data to start coming in.
     usleep(1000 * 1000);
     RCLCPP_INFO(get_logger(), "\n[√] Telemetry initialization complete.");
@@ -142,17 +123,17 @@ void RmcsFlightController::load_parameters()
 {
     debug_ = get_parameter_or<bool>("debug", false);
 
-    kp_ = get_parameter_or<double>("pid.kp", 0.5);
-    ki_ = get_parameter_or<double>("pid.ki", 0.0);
-    kd_ = get_parameter_or<double>("pid.kd", 0.1);
+    kp_pos_ = get_parameter_or<double>("pid.outer.kp", 0.5);
+    ki_pos_ = get_parameter_or<double>("pid.outer.ki", 0.0);
+    kd_pos_ = get_parameter_or<double>("pid.outer.kd", 0.1);
+    kp_velo_ = get_parameter_or<double>("pid.inner.kp", 0.5);
+    ki_velo_ = get_parameter_or<double>("pid.inner.ki", 0.0);
+    kd_velo_ = get_parameter_or<double>("pid.inner.kd", 0.1);
 
     control_frequency_hz_ = get_parameter_or<int>("control_frequency", 50);
     mid360_data_topic_ = get_parameter_or<std::string>("mid360_data_topic", "/rmcs_slam/position");
 
     auto dji_config_path = get_parameter_or<std::string>("dji.config_path", "");
-
-    RCLCPP_INFO(get_logger(), "Loaded parameters: kp=%f, ki=%f, kd=%f, dji_config_path=%s",
-        kp_, ki_, kd_, dji_config_path.data());
 
     char* argv[] = {
         nullptr,
@@ -167,4 +148,5 @@ void RmcsFlightController::release_telemtetry()
     vehicle_->subscribe->removePackage(1, responseTimeout_);
     std::cout << "\n---[√] Release telemetry complete.\n"
               << std::endl;
+}
 }
