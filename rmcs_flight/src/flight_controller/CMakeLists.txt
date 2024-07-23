@@ -23,7 +23,7 @@ endforeach()
 
 aux_source_directory(src/common SOURCE)
 
-file(GLOB FUNCTIONS_SOURCE src/functions/*.cpp)
+file(GLOB FUNCTIONS_SOURCE src/controller_functions/*.cpp)
 
 # BUILD EXE
 add_executable(

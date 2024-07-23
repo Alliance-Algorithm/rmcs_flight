@@ -4,9 +4,9 @@
 #include <eigen3/Eigen/Eigen>
 
 namespace rmcs_flight {
-
 class DoubleLoopPIDController {
 public:
+    DoubleLoopPIDController() {};
     DoubleLoopPIDController(double kp_pos, double ki_pos, double kd_pos,
         double kp_velo, double ki_velo, double kd_velo)
     {

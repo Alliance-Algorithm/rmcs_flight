@@ -25,6 +25,7 @@
 #include "double_loop_pid/pid_controller.hpp"
 
 namespace rmcs_flight {
+
 class RmcsFlightController : public rclcpp::Node {
 public:
     explicit RmcsFlightController(int argc, char** argv);
@@ -83,4 +84,5 @@ private:
     void load_parameters();
     void release_telemtetry();
 };
+
 }
