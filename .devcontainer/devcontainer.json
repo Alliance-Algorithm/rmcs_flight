@@ -2,7 +2,7 @@
 // README at: https://github.com/devcontainers/templates/tree/main/src/docker-existing-dockerfile
 {
     "name": "rmcs_flight",
-    "image": "rmcs_flight:latest",
+    "image": "rmcs_flight:1.0",
     "privileged": true,
     "mounts": [
         {
