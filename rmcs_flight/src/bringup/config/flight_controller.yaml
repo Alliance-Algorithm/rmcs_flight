@@ -10,7 +10,9 @@ rmcs_flight_controller:
         kp: 20.0
         ki: 0.0
         kd: 0.5
-        
+    serial:
+      port: "/dev/ttyUSB0"
+      baudrate: 115200
     control_frequency: 10
     mid360_data_topic: "/rmcs_slam/position"
     dji:
