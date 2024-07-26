@@ -37,14 +37,6 @@ void RmcsFlightController::receive_subscription_data()
     } else {
         rc_mode_ = 0;
     }
-
-    imu_euler_angles_ = to_euler_angle(
-        Eigen::Quaterniond(
-            imu_raw_quaternion.q0,
-            imu_raw_quaternion.q1,
-            imu_raw_quaternion.q2,
-            imu_raw_quaternion.q3));
-
     // std::cout << "Attitude Euler_angles (x,y,z) = (" << imu_euler_angles_.x() / std::numbers::pi * 180
     //           << ", " << imu_euler_angles_.y() / std::numbers::pi * 180 << ", " << imu_euler_angles_.z() / std::numbers::pi * 180 << ")\n";
 

@@ -24,7 +24,15 @@
 // pid
 #include "double_loop_pid/pid_controller.hpp"
 
+// serial
+#include <serial/serial.h>
+
 namespace rmcs_flight {
+
+struct SerialInfo {
+    std::string serial_port;
+    int baudrate;
+};
 
 class RmcsFlightController : public rclcpp::Node {
 public:
@@ -49,8 +57,7 @@ private:
     DoubleLoopPIDController pid_controller_;
 
     // telemetry
-    int responseTimeout_
-        = 1;
+    int responseTimeout_ = 1;
     Eigen::Vector3d imu_euler_angles_;
     int rc_mode_ = -1;
     int last_rc_mode_ = -1;
@@ -59,6 +66,10 @@ private:
     // other parameters
     int control_frequency_hz_;
     int debug_;
+
+    // serial
+    SerialInfo serial_info_;
+    std::unique_ptr<serial::Serial> serial_;
 
 private:
     /* --- main process functions --- */
@@ -81,6 +92,7 @@ private:
     void initialization();
     void initialize_djiosdk();
     bool initialize_telemetry();
+    void initialize_serial(SerialInfo serial_info);
     void load_parameters();
     void release_telemtetry();
 };

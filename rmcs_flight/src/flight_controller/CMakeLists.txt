@@ -11,6 +11,7 @@ set(PACKAGES
     Eigen3
     DJIOSDK
     tf2_ros
+    serial
 )
 
 # FIND PACKAGES
