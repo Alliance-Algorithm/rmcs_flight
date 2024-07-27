@@ -12,6 +12,7 @@ rmcs_flight_controller:
         kd: 0.2
         
     control_frequency: 20
+
     mid360_data_topic: "/rmcs_slam/position"
     dji:
       config_path: "/workspaces/workspace/rmcs_flight/rmcs_flight/src/bringup/config/Dji_config.txt"

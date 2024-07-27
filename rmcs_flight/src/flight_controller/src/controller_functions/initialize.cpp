@@ -23,6 +23,9 @@ void RmcsFlightController::initialization()
     // initialize telemetry
     initialize_telemetry();
 
+    // initialize serial
+    initialize_serial(serial_info_);
+
     // start main process timer
     main_process_timer_ = this->create_wall_timer(
         std::chrono::milliseconds(static_cast<int>(1000 / control_frequency_hz_)),
@@ -135,11 +138,37 @@ void RmcsFlightController::load_parameters()
 
     auto dji_config_path = get_parameter_or<std::string>("dji.config_path", "");
 
+    serial_info_.serial_port = get_parameter_or<std::string>("serial.port", "");
+    serial_info_.baudrate = get_parameter_or<int>("serial.baudrate", 115200);
+
+
     char* argv[] = {
         nullptr,
         dji_config_path.data(),
     };
     linuxEnvironment_ = new LinuxSetup(2, argv);
+}
+
+
+void RmcsFlightController::initialize_serial(SerialInfo serial_info)
+{
+    for (int i = 0; i < 5; i++) {
+        try {
+            serial_ = std::make_unique<serial::Serial>(
+                serial_info.serial_port,
+                serial_info.baudrate,
+                serial::Timeout::simpleTimeout(50U),
+                serial::eightbits,
+                serial::parity_none,
+                serial::stopbits_one,
+                serial::flowcontrol_none);
+            break;
+        } catch (const serial::IOException& se) {
+            RCLCPP_ERROR(get_logger(), "[x] Can't open serial port!");
+            RCLCPP_ERROR(get_logger(), "%s", se.what());
+        }
+        sleep(1);
+    }
 }
 
 void RmcsFlightController::release_telemtetry()

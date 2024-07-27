@@ -4,3 +4,6 @@
 [submodule "rmcs_flight/src/rmcs_slam"]
 	path = rmcs_flight/src/rmcs_slam
 	url = https://github.com/Alliance-Algorithm/rmcs_slam.git
+[submodule "rmcs_flight/src/rmcs_serial"]
+	path = rmcs_flight/src/rmcs_serial
+	url = https://github.com/Alliance-Algorithm/ros2-serial.git

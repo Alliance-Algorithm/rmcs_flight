@@ -4,6 +4,7 @@ namespace rmcs_flight {
 Eigen::Vector3d RmcsFlightController::to_drone_coordinate(const Eigen::Vector3d& ground_input,const Eigen::Quaterniond& q)
 {
    return {q.inverse() * ground_input};
+
 }
 
 void RmcsFlightController::angular_and_yaw_rate_ctrl(float roll, float pitch, float yaw_rate, float z_velo)

@@ -41,7 +41,6 @@ public:
 
         // inner pid (velocity)
         Eigen::Vector3d current_velocity = current_position - last_position_;
-
         velo_para.current_error = velocity_input - current_velocity;
 
         Eigen::Vector3d control_input = velo_para.Kp * velo_para.current_error + velo_para.Ki * velo_para.integral_error + velo_para.Kd * (velo_para.current_error - velo_para.last_error);
@@ -60,6 +59,7 @@ public:
 
         // std::cout << "position error:" << pos_para.current_error.x() << " , "<<  pos_para.current_error.y()<< std::endl;
         std::cout << "--------------------------------velocity error:" << velo_para.current_error.x() << " , " << velo_para.current_error.y() << std::endl;
+
 
         last_position_ = current_position;
 

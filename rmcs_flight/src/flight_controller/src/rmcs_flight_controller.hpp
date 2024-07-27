@@ -24,7 +24,16 @@
 // pid
 #include "double_loop_pid/pid_controller.hpp"
 
+
+// serial
+#include <serial/serial.h>
+
 namespace rmcs_flight {
+
+struct SerialInfo {
+    std::string serial_port;
+    int baudrate;
+};
 
 class RmcsFlightController : public rclcpp::Node {
 public:
@@ -58,6 +67,10 @@ private:
     int control_frequency_hz_;
     int debug_;
 
+    // serial
+    SerialInfo serial_info_;
+    std::unique_ptr<serial::Serial> serial_;
+
 private:
     /* --- main process functions --- */
 
@@ -71,6 +84,7 @@ private:
     /* --- utility functions --- */
 
     Eigen::Vector3d to_drone_coordinate(const Eigen::Vector3d& ground,const Eigen::Quaterniond& q);
+
     void angular_and_yaw_rate_ctrl(float roll, float pitch, float yaw_rate, float z_velo);
     bool if_self_stable();
 
@@ -79,6 +93,7 @@ private:
     void initialization();
     void initialize_djiosdk();
     bool initialize_telemetry();
+    void initialize_serial(SerialInfo serial_info);
     void load_parameters();
     void release_telemtetry();
 };
