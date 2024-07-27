@@ -2,6 +2,7 @@
 
 #include "pid_parameters.hpp"
 #include <eigen3/Eigen/Eigen>
+#include <iostream>
 
 namespace rmcs_flight {
 class DoubleLoopPIDController {
@@ -43,9 +44,22 @@ public:
         velo_para.current_error = velocity_input - current_velocity;
 
         Eigen::Vector3d control_input = velo_para.Kp * velo_para.current_error + velo_para.Ki * velo_para.integral_error + velo_para.Kd * (velo_para.current_error - velo_para.last_error);
+        double limit = 8;
+        control_input = Eigen::Vector3d(
+            std::clamp(control_input.x(), -limit, limit),
+            std::clamp(control_input.y(), -limit, limit),
+            std::clamp(control_input.z(), -limit, limit));
 
         velo_para.integral_error += velo_para.current_error;
+        velo_para.integral_error = Eigen::Vector3d(
+            std::clamp(velo_para.integral_error.x(), -10.0, 10.0),
+            std::clamp(velo_para.integral_error.y(), -10.0, 10.0),
+            std::clamp(velo_para.integral_error.z(), -10.0, 10.0));
         velo_para.last_error = velo_para.current_error;
+
+        // std::cout << "position error:" << pos_para.current_error.x() << " , "<<  pos_para.current_error.y()<< std::endl;
+        std::cout << "--------------------------------velocity error:" << velo_para.current_error.x() << " , " << velo_para.current_error.y() << std::endl;
+
 
         last_position_ = current_position;
 

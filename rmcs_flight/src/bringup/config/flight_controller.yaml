@@ -3,17 +3,16 @@ rmcs_flight_controller:
     debug: false
     pid:
       outer:
-        kp: 20.0
+        kp: 0.07
         ki: 0.0
-        kd: 0.0
+        kd: 0.01
       inner:
-        kp: 20.0
+        kp: 180.0
         ki: 0.0
-        kd: 0.5
-    serial:
-      port: "/dev/ttyUSB0"
-      baudrate: 115200
-    control_frequency: 10
+        kd: 0.2
+        
+    control_frequency: 20
+
     mid360_data_topic: "/rmcs_slam/position"
     dji:
       config_path: "/workspaces/workspace/rmcs_flight/rmcs_flight/src/bringup/config/Dji_config.txt"

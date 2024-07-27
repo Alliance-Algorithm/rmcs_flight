@@ -1,27 +1,10 @@
 #include "rmcs_flight_controller.hpp"
 
 namespace rmcs_flight {
-Eigen::Vector3d RmcsFlightController::to_euler_angle(const Eigen::Quaterniond& q)
+Eigen::Vector3d RmcsFlightController::to_drone_coordinate(const Eigen::Vector3d& ground_input,const Eigen::Quaterniond& q)
 {
-    double roll, pitch, yaw;
-    // roll (x-axis rotation)
-    double sinr_cosp = +2.0 * (q.w() * q.x() + q.y() * q.z());
-    double cosr_cosp = +1.0 - 2.0 * (q.x() * q.x() + q.y() * q.y());
-    roll = atan2(sinr_cosp, cosr_cosp);
+   return {q.inverse() * ground_input};
 
-    // pitch (y-axis rotation)
-    double sinp = +2.0 * (q.w() * q.y() - q.z() * q.x());
-    if (fabs(sinp) >= 1)
-        pitch = copysign(M_PI / 2, sinp); // use 90 degrees if out of range
-    else
-        pitch = asin(sinp);
-
-    // yaw (z-axis rotation)
-    double siny_cosp = +2.0 * (q.w() * q.z() + q.x() * q.y());
-    double cosy_cosp = +1.0 - 2.0 * (q.y() * q.y() + q.z() * q.z());
-    yaw = atan2(siny_cosp, cosy_cosp);
-
-    return Eigen::Vector3d(roll, pitch, yaw);
 }
 
 void RmcsFlightController::angular_and_yaw_rate_ctrl(float roll, float pitch, float yaw_rate, float z_velo)
@@ -38,12 +21,15 @@ void RmcsFlightController::angular_and_yaw_rate_ctrl(float roll, float pitch, fl
 bool RmcsFlightController::if_self_stable()
 {
     if ((last_rc_mode_ == rc_mode_) && (rc_mode_ != 1)) {
+
+        // Control by RC
         if (debug_)
             RCLCPP_INFO(get_logger(), "Mauanl mode, waiting for rc mode change.");
 
         return false;
 
     } else if ((last_rc_mode_ == 1) && (rc_mode_ != 1)) {
+        // Control to RC
         RCLCPP_INFO(get_logger(), "\n\n>>> Manual mode, release control authority.\n");
 
         ACK::ErrorCode result = vehicle_->releaseCtrlAuthority(1);
@@ -57,6 +43,7 @@ bool RmcsFlightController::if_self_stable()
         return false;
 
     } else if ((last_rc_mode_ != 1) && (rc_mode_ == 1)) {
+        // Control by OSDK
         RCLCPP_INFO(get_logger(), "\n\n>>> Self-stabilization mode, start control.\n");
 
         // reset PID and target position

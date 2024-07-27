@@ -15,6 +15,10 @@ void RmcsFlightController::main_process_timer_callback()
         control_input.z()
     };
 
+    std::cout << "control : " << control_output.x() << "," <<  control_output.y() << std::endl;
+
+    control_output = to_drone_coordinate(control_output, mid360_quaternion_);
+
     angular_and_yaw_rate_ctrl(
         control_output.x(),
         control_output.y(),

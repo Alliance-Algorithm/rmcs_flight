@@ -24,6 +24,7 @@
 // pid
 #include "double_loop_pid/pid_controller.hpp"
 
+
 // serial
 #include <serial/serial.h>
 
@@ -48,8 +49,8 @@ private:
 
     // mid360 datas
     std::string mid360_data_topic_;
-    Eigen::Vector3d mid360_position_ = Eigen::Vector3d::Zero();
-    Eigen::Vector3d mid360_euler_angles_ = Eigen::Vector3d::Zero();
+    Eigen::Vector3d mid360_position_ = Eigen::Vector3d::Identity();
+    Eigen::Quaterniond mid360_quaternion_ = Eigen::Quaterniond::Identity();
 
     // PID parameters
     double kp_pos_, ki_pos_, kd_pos_;
@@ -57,8 +58,7 @@ private:
     DoubleLoopPIDController pid_controller_;
 
     // telemetry
-    int responseTimeout_ = 1;
-    Eigen::Vector3d imu_euler_angles_;
+    int responseTimeout_= 1;
     int rc_mode_ = -1;
     int last_rc_mode_ = -1;
     float altitude_;
@@ -83,7 +83,8 @@ private:
 
     /* --- utility functions --- */
 
-    Eigen::Vector3d to_euler_angle(const Eigen::Quaterniond& q);
+    Eigen::Vector3d to_drone_coordinate(const Eigen::Vector3d& ground,const Eigen::Quaterniond& q);
+
     void angular_and_yaw_rate_ctrl(float roll, float pitch, float yaw_rate, float z_velo);
     bool if_self_stable();
 

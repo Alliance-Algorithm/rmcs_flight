@@ -137,8 +137,10 @@ void RmcsFlightController::load_parameters()
     mid360_data_topic_ = get_parameter_or<std::string>("mid360_data_topic", "/rmcs_slam/position");
 
     auto dji_config_path = get_parameter_or<std::string>("dji.config_path", "");
+
     serial_info_.serial_port = get_parameter_or<std::string>("serial.port", "");
     serial_info_.baudrate = get_parameter_or<int>("serial.baudrate", 115200);
+
 
     char* argv[] = {
         nullptr,
@@ -146,6 +148,7 @@ void RmcsFlightController::load_parameters()
     };
     linuxEnvironment_ = new LinuxSetup(2, argv);
 }
+
 
 void RmcsFlightController::initialize_serial(SerialInfo serial_info)
 {
